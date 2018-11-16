@@ -1,0 +1,173 @@
+<style lang="less">
+.content {
+  position: fixed;
+  top: 98rpx;
+  bottom: 0;
+  display: flex;
+  width: 750rpx;
+  justify-content: space-between;
+  .left {
+    height: 100%;
+    width: 200rpx;
+    flex-shrink: 0;
+    background: #f4f4f4;
+    .category-item {
+      width: 100%;
+      text-align: center;
+      height: 100rpx;
+      line-height: 100rpx;
+      border-bottom: 1px #eee solid;
+      position: relative;
+    }
+    .active {
+      color: #eb4e5c;
+      background: #fff;
+      &:after {
+        display: block;
+        content: '';
+        width: 4px;
+        height: 60rpx;
+        background: #ff6066;
+        position: absolute;
+        left: 0;
+        top: 20rpx;
+      }
+    }
+  }
+}
+
+.right {
+  flex: 1;
+  .right-title {
+    padding: 40rpx 0;
+    text-align: center;
+    text {
+      margin: 0 20rpx;
+    }
+  }
+
+  .wares {
+    display: flex;
+    flex-wrap: wrap;
+
+    .ware-item {
+      width: 33%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    image {
+      width: 110rpx;
+      height: 80rpx;
+    }
+  }
+}
+.scroll-left {
+  height: 100%;
+}
+</style>
+<template>
+  <view class="container">
+    <!-- 搜索 -->
+    <search></search>
+
+    <view class="content">
+        <view class="left">
+            <scroll-view scroll-y class="scroll-left" >
+              <view class="category-item {{currentTab == index ? 'active': '' }}" 
+              wx:for="{{category}}" 
+              wx:key="{{index}}"
+              @tap="handleTab( {{index}} )">
+                  {{item.cat_name}}
+              </view>
+            </scroll-view>
+        </view>
+
+        <!-- 右侧的界面 -->
+        <view class="right">
+          <scroll-view scroll-y class="scroll-left" >
+            <!-- rightData是右侧的动态数据 -->
+            <view wx:for="{{rightData}}" wx:key="{{index}}">
+                <view class="right-title">
+                    <span>/</span>
+                    <text>{{item.cat_name}}</text>
+                    <span>/</span>
+                </view>
+                <view class="wares">
+
+                    <!-- 右侧的商品列表 -->
+                    <view  
+                    @tap="handleSearch({{ subItem.cat_name }})"
+                    wx:for="{{item.children}}" 
+                    wx:key="{{index}}"
+                    wx:for-item="subItem"
+                    class="ware-item">
+                        <image src="{{ 'https://www.itjustfun.cn/' + subItem.cat_icon }}"></image>
+                        <text>{{subItem.cat_name}}</text>
+                    </view>
+                </view>
+            </view>
+          </scroll-view>
+        </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import Search from '../components/search';
+
+export default class Category extends wepy.page {
+  config = {
+    navigationBarTitleText: '分类'
+  };
+
+  data = {
+    // 当前右侧的数据
+    rightData: {},
+    currentTab: 0,
+
+    // 右侧的数据
+    category: []
+  };
+
+  onLoad() {
+    // 初始化第一次rightData的值，目前category的第一个下children
+    //this.rightData = this.category[this.currentTab].children;
+
+    wx.request({
+      url: 'https://www.itjustfun.cn/api/public/v1/categories',
+      success: res => {
+        const { data } = res.data;
+        this.category = data;
+        this.rightData = data[0].children;
+        this.$apply();
+      }
+    });
+  }
+
+  components = {
+    search: Search
+  };
+
+  methods = {
+    handleTab: function(index) {
+      this.currentTab = index;
+
+      //点击切换右侧的数据
+      this.rightData = this.category[index].children;
+    },
+
+    handleSearch: function(keyWord){
+       
+       // 跳转到其他页面
+       wx.navigateTo({
+        url: `/pages/search-list?keyword=${keyWord}`
+        })
+
+    }
+  };
+}
+</script>

@@ -1,0 +1,60 @@
+<style lang="less">
+  @import "./style/iconfont.wxss";
+
+  page{
+    font-size:14px;
+  }
+
+  .colorRed{
+    color:#ff6066;
+  }
+</style>
+
+<script>
+import wepy from 'wepy'
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/index',
+      'pages/category',
+      'pages/goods_list',
+      'pages/goods_detail',
+      'pages/cart',
+      'pages/authrize'
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#ea4451',
+      navigationBarTitleText: '优购',
+      navigationBarTextStyle: 'white' 
+    },
+    tabBar: {
+      selectedColor: "#ff0000",
+      list: [
+        {
+          pagePath: "pages/index",
+          text: "首页",
+          iconPath: "images/icon_home@3x.png",
+          selectedIconPath: "images/icon_home_active@3x.png"
+        },{
+          pagePath: "pages/category",
+          text: "分类",
+          iconPath: "images/icon_category@3x.png",
+          selectedIconPath: "images/icon_category_active@3x.png"
+        },
+        {
+          pagePath: "pages/cart",
+          text: "购物车",
+          iconPath: "images/icon_cart@3x.png",
+          selectedIconPath: "images/icon_cart_active@3x.png"
+        }
+      ]
+    }
+  }
+
+  onLaunch() {
+    console.log('on launch')
+  }
+}
+</script>

@@ -1,0 +1,447 @@
+<style lang="less">
+page {
+  background: #f4f4f4;
+  height: 100%;
+}
+
+.main {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 750rpx;
+}
+
+.container {
+  height: 100%;
+}
+
+.cart-top {
+  background: #fff;
+  .receive {
+    padding: 20rpx;
+    display: flex;
+    justify-content: space-between;
+  }
+  .address {
+    padding: 0 20rpx 20rpx;
+  }
+  .address-bar {
+    display: block;
+    width: 750rpx;
+    height: 15rpx;
+  }
+}
+
+.list-title {
+  border-top: 20rpx #f4f4f4 solid;
+  padding: 20rpx;
+  border-bottom: 1px #dddddd solid;
+  background: #fff;
+}
+
+.ware-list {
+  background: #fff;
+  padding-bottom: 95rpx;
+}
+.ware-item {
+  display: flex;
+  padding: 0 20rpx;
+}
+.choice-button {
+  width: 70rpx;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.ware-content {
+  display: flex;
+  padding: 20rpx 0;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px #f5f5f5 solid;
+
+  .ware-image {
+    margin-right: 20rpx;
+    image {
+      display: block;
+      width: 160rpx;
+      height: 160rpx;
+    }
+  }
+  .ware-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-bottom: 20rpx;
+  }
+  .ware-info-btm {
+    display: flex;
+    justify-content: space-between;
+    .ware-price {
+      font-size: 18px;
+      color: #ff6066;
+      span {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.cart-total {
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 95rpx;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  .total-button {
+    box-sizing: border-box;
+    padding-left: 20rpx;
+    margin-right: 50rpx;
+    display: flex;
+    align-items: center;
+
+    icon {
+      margin-right: 20rpx;
+    }
+  }
+
+  .total-center {
+    flex: 1;
+    .colorRed {
+      text {
+        font-size: 12px;
+      }
+    }
+
+    .price-tips {
+      color: #999;
+      font-size: 12px;
+    }
+  }
+
+  .accounts {
+    flex-shrink: 0;
+    width: 230rpx;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff6066;
+    color: #fff;
+  }
+}
+.calculate {
+  display: flex;
+  .rect {
+    width: 50rpx;
+    height: 50rpx;
+    line-height: 50rpx;
+    border: 1px #666 solid;
+    text-align: center;
+  }
+  .number {
+    line-height: 50rpx;
+    width: 90rpx;
+    padding: 5rpx;
+    box-sizing: border-box;
+    text-align: center;
+  }
+}
+</style>
+<template>
+<view class="main">
+  <scroll-view scroll-y class="container">
+
+    <!-- 收货人信息 -->
+    <view class="cart-top" wx:if="{{address.userName}}">
+      <view class="receive">
+        <view class="name">
+          收货人: {{address.userName}}
+        </view>
+        <view class="phonen-number">
+          {{address.telNumber}}
+        </view>
+      </view>
+      <view class="address">
+        收货地址: {{address.address}}
+      </view>
+      <image src="../images/cart_border@2x.png" class="address-bar"></image>
+    </view>
+
+    <!-- 搜索人为空时候去新增收货人 -->
+    <view class="add_addresss" bindtap="handleAddress"  wx:if="{{!address.userName}}">
+      新增收货人
+    </view>
+
+    <view class="list-title">
+      优购生活馆
+    </view>
+
+    <!-- 购物车列表 -->
+    <view class="ware-list">
+      <view wx:for="{{cartData}}" wx:key="{{index}}">
+        <view class="ware-item">
+
+        <!-- 左侧的按钮 -->
+          <view class="choice-button" @tap="handleSelect({{item}})">
+            <icon type="success" color="{{item.selected ? 'red' : '#999'}}" size="18"/>
+          </view>
+
+
+          <view class="ware-content">
+
+              <!-- 左侧的图片 -->
+            <navigator class="ware-image" url="">
+              <image src="{{item.goods_small_logo}}"></image>
+            </navigator>
+
+            <!-- 右边的商品信息 -->
+            <view class="ware-info">
+              <navigator url="" class="ware-title">
+                {{item.goods_name}}
+              </navigator>
+              <view class="ware-info-btm">
+                <view class="ware-price">
+                  <span>￥</span>{{item.goods_price}}
+                </view>
+
+                <!-- 修改商品的数量 -->
+                <view class="calculate">
+                  <view class="calculate">
+                    <view class="rect" @tap="handleDecrease({{item}})">-</view>
+                    <view class="number">{{item.num || 1}}</view>
+                    <view class="rect" @tap="handleIncrease({{item}})">+</view>
+                  </view>
+                </view>
+              </view>
+            </view>
+
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 结算 -->
+    <view class="cart-total">
+      <view class="total-button">
+        <icon type="success" color="{{allSelect ? 'red' : '#999'}}" size="18"/>全选
+      </view>
+      <view class="total-center">
+        <view class="total-price">
+          合计： 
+          <text class="colorRed">
+            <text>￥</text>{{allPrice}}
+          </text>
+        </view>
+        <view class="price-tips">
+          包含运费
+        </view>
+      </view>
+      <view class="accounts" bindtap="handleBuy">
+        结算
+      </view>
+    </view>
+
+  </scroll-view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import manageCart from '../utils/manage-cart.js';
+import authrize from '../utils/authrize.js';
+
+export default class Cart extends wepy.page {
+  config = {
+    navigationBarTitleText: '搜索'
+  };
+
+  data = {
+    // 存储购物车列表，默认是空数组
+    cartData: [],
+    allSelect: false,
+    allPrice: 0,
+    address: {}
+  };
+
+  watch = {
+    cartData(newValue, oldValue) {
+      let _select = true;
+
+      for (let key in newValue) {
+        const v = newValue[key];
+        if (!v.selected) {
+          _select = false;
+        }
+      }
+
+      this.allSelect = _select;
+    }
+  };
+
+  onShow() {
+    // 获取本地的数据
+    const cacheData = manageCart.getStorage();
+    const { list, price, address } = cacheData;
+    // 直接把本地缓存的数据设置给cartData.渲染到页面
+    this.cartData = list;
+    this.allPrice = price;
+    this.address = address;
+  }
+
+  methods = {
+    // 去添加收货人
+    handleAddress: function() {
+      wx.chooseAddress({
+        success: res => {
+          const addr = {
+            userName: res.userName,
+            telNumber: res.telNumber,
+            address: `${res.provinceName}${res.cityName}${res.countyName}${
+              res.detailInfo
+            }`
+          };
+
+          this.address = addr;
+          this.$apply();
+
+          // 通过购物车管理类存到本地
+          manageCart.updataAddress(addr);
+        }
+      });
+    },
+
+    handleDecrease: function(ware) {
+      ware.num = ware.num - 1;
+
+      // 数量小于0删除商品，调用的manageCart.remove
+      if (ware.num <= 0) {
+        wx.showModal({
+          title: '',
+          content: '真的要删除商品吗？',
+          success: function(res) {
+            res.confirm && manageCart.remove(ware);
+          }
+        });
+      } else {
+        // 更新商品的数量
+        manageCart.update(ware);
+      }
+      // 更新cartData的数据
+      this.cartData = manageCart.getStorage().list;
+      // 添加商品后修改总的价格
+      this.allPrice = Number(manageCart.getStorage().price).toFixed(2);
+    },
+    handleIncrease: function(ware) {
+      ware.num = ware.num + 1;
+      // 更新商品的数量,和全部得价格
+      manageCart.update(ware);
+      // 更新cartData的数据
+      this.cartData = manageCart.getStorage().list;
+      // 添加商品后修改总的价格
+      this.allPrice = Number(manageCart.getStorage().price).toFixed(2);
+    },
+    handleSelect: function(ware) {
+      // 修改改商品的selected
+      ware.selected = !ware.selected;
+
+      // 更新商品的selected
+      manageCart.update(ware);
+
+      // 更新cartData的数据
+      this.cartData = manageCart.getStorage().list;
+    },
+
+    // 购买结算
+    handleBuy: function() {
+      const { cartData } = this;
+      const data = {
+        order_price: this.allPrice,
+        consignee_addr: this.address.address,
+        goods: []
+      };
+
+      // 把数组转换成对象
+      // var a = ["a", "b", "c"];
+      // var obj = {}
+
+      // a.forEach((v, i) => {
+      //   obj[i] = v;
+      // })
+      // console.log(obj)
+
+      // 把list对象转成数组
+      //console.log(Object.keys(cartData))
+      data.goods = Object.keys(cartData).map((id, i) => {
+        return {
+          goods_id: cartData[id].goods_id,
+          goods_number: cartData[id].num,
+          goods_price: cartData[id].goods_price
+        };
+      });
+
+      // 判断用户有没授权，没有的话跳转到授权页
+      wx.getSetting({
+        success: res => {
+          if (!res.authSetting['scope.userInfo']) {
+            wx.navigateTo({
+              url: '/pages/authrize'
+            });
+          }
+        }
+      });
+
+      // 如果没有授权，跳转到授权页
+      if (!authrize.isAuth) {
+        wx.navigateTo({
+          url: '/pages/authrize'
+        });
+
+        // 阻止提交订单
+        return;
+      }
+
+      wx.showLoading({
+        content: '正在提交订单'
+      });
+
+      // 创建订单
+      wx.request({
+        url: 'https://www.itjustfun.cn/api/public/v1/my/orders/create',
+        method: 'POST',
+        header: {
+          Authorization: authrize.getToken()
+        },
+        data,
+        success: res => {
+          wx.hideLoading();
+
+          //获取订单编号
+          const { order_number } = res.data.data;
+
+          // 订单支付
+          wx.request({
+            url:
+              'https://www.itjustfun.cn/api/public/v1/my/orders/req_unifiedorder',
+            method: 'POST',
+            header: {
+              Authorization: authrize.getToken()
+            },
+            data: { order_number },
+            success: res => {
+              const { wxorder } = res.data.data;
+              wx.requestPayment(wxorder);
+            }
+          });
+        }
+      });
+    }
+  };
+}
+</script>

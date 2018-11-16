@@ -1,0 +1,55 @@
+<style lang="less">
+</style>
+<template>
+  <view class="container">
+      <button open-type="getUserInfo" bindgetuserinfo="getUserInfo">授权</button>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import authrize from "../utils/authrize.js";
+
+export default class Template extends wepy.page {
+  config = {
+    navigationBarTitleText: '搜索'
+  };
+
+  data = {};
+
+  onLoad(options) {}
+
+  methods = {
+    getUserInfo: function(res) {
+      const data = {};
+
+      wx.login({
+        success: res => {
+          data.code = res.code;
+
+          wx.getUserInfo({
+            success: res => {
+                data.encryptedData = res.encryptedData;
+                data.iv = res.iv;
+                data.rawData = res.rawData;
+                data.signature = res.signature;
+
+                wx.request({
+                    url: "https://www.itjustfun.cn/api/public/v1/users/wxlogin",
+                    method: "POST",
+                    data,
+                    success: res => {
+                        const {token} = res.data.data;
+                        authrize.setToken(token);
+                        wx.navigateBack();
+                    }
+                })
+                
+            }
+          });
+        }
+      });
+    }
+  };
+}
+</script>

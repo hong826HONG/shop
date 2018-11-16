@@ -1,0 +1,278 @@
+<style lang="less">
+.swiper-item{
+  image{
+    height:340rpx;
+    width:750rpx;
+    display: block;
+  }
+}
+
+.category-wrapper{
+  display: flex;
+  justify-content: space-around;
+  padding:30rpx 0;
+  .category-item{
+    flex:1;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+
+    image{
+      width:100rpx;
+      height:100rpx;
+      display: block;
+    }
+    text{
+      margin-top: 10rpx;
+    }
+  }
+}
+
+.wares-column{
+  .column-title{
+    image{
+      display: block;
+      width:750rpx;
+      height:59rpx;
+    }
+  }
+  .column-content{
+    padding:20rpx;
+    display: flex;
+    justify-content: space-between;
+
+    .column-left{
+      // 方法伸缩性布局隔壁的模块过宽导致变形
+      flex-shrink: 0;
+      image{
+        display: block;
+        width:230rpx;
+        height:388rpx;
+      }
+    }
+
+    .column-right{
+      display: flex;
+      flex-wrap: wrap;
+      flex:1;
+      margin-left:15rpx;
+      justify-content: space-between;
+      
+      image{
+        display: block;
+        width:200rpx;
+        height:187rpx;
+      }
+
+      // 选中第一张和第四张
+      .ware-item:nth-child(3n-2) image{
+        width:260rpx;
+      }
+    }
+  }
+}
+.toTop{
+  position: fixed;
+  right:30rpx;
+   bottom:30rpx;
+   width:100rpx;
+   height:100rpx;
+   border-radius: 50%;
+   background:rgba(255,255,255,0.8);
+   line-height: 100rpx;
+   text-align: center;
+   font-size:12px;
+   color:#666;
+}
+</style>
+<template>
+  <view class="container">
+
+    <!-- 搜索部分 -->
+    <search></search>
+
+    <!-- 轮播图 -->
+    <swiper indicator-dots autoplay>
+        <swiper-item wx:for="{{swiperData}}" wx:key="{{index}}" class="swiper-item">
+          <navigator url="{{item.navigator_url}}">
+            <image src="{{item.image_src}}" mode="aspectFill"></image>
+          </navigator>
+        </swiper-item>
+    </swiper>
+
+    <!-- 分类 -->
+    <view class="category-wrapper">
+      <navigator url="{{item.navigator_url}}" open-type="{{item.open_type}}" wx:for="{{categorys}}" wx:key="{{index}}">
+        <view class="category-item">
+          <image src="{{item.image_src}}"></image>
+          <text>{{item.name}}</text>
+        </view>
+      </navigator>
+    </view>
+
+    <!-- 楼层 -->
+    <view class="wares-column" wx:for="{{floor}}" wx:key="{{index}}">
+      <view class="column-title">
+        <image src="{{item.titleImage}}" mode="aspectFill"></image>
+      </view>
+      <view class="column-content">
+        <view class="column-left">
+          <navigator url="{{item.largeImage.url}}">
+            <image src="{{item.largeImage.src}}"/>
+          </navigator>
+        </view>
+        <view class="column-right">
+          <view class="ware-item" 
+          wx:for="{{item.smallImage}}"
+          wx:for-item="subItem"
+          wx:for-index="subIndex"
+          wx:key="{{subIndex}}">
+            <navigator url="{{subItem.url}}">
+              <image src="{{subItem.src}}"/>
+            </navigator>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 回到顶部 -->
+    <view class="toTop" bindtap="handleToTop">
+      顶部
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Search from '../components/search';
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: 'test',
+      navigationBarBackgroundColor: '#ea4451',
+    }
+
+    data = {
+      swiperData: [],
+      categorys: [],
+
+      floor: [
+        // {
+        //   titleImage: "https://img.alicdn.com/tfs/TB1x3nNX6uhSKJjSspmXXcQDpXa-258-52.png",
+        //   largeImage: {
+        //     src: "https://img.alicdn.com/bao/uploaded/i1/268927841/TB2qW3doh6I8KJjSszfXXaZVXXa_!!268927841.jpg_400x400q90.jpg_.webp",
+        //     url: ""
+        //   },
+        //   smallImage: [
+        //     { src: "https://img.alicdn.com/bao/uploaded/i1/268927841/TB2qW3doh6I8KJjSszfXXaZVXXa_!!268927841.jpg_400x400q90.jpg_.webp", url: "" },
+        //     { src: "https://img.alicdn.com/bao/uploaded/i1/268927841/TB2qW3doh6I8KJjSszfXXaZVXXa_!!268927841.jpg_400x400q90.jpg_.webp", url: "" },
+        //     { src: "https://img.alicdn.com/bao/uploaded/i1/268927841/TB2qW3doh6I8KJjSszfXXaZVXXa_!!268927841.jpg_400x400q90.jpg_.webp", url: "" },
+        //     { src: "https://img.alicdn.com/bao/uploaded/i1/268927841/TB2qW3doh6I8KJjSszfXXaZVXXa_!!268927841.jpg_400x400q90.jpg_.webp", url: "" } 
+        //   ]
+        // }
+      ]
+    }
+
+    onLoad() {
+      // 轮播图
+      // 微信下程序提供的异步请求方法，相当于jq的ajax
+      // wx在wepy某些版本可能需要使用wepy
+      wx.request({
+        url: "https://www.itjustfun.cn/api/public/v1/home/swiperdata",
+
+        // 推荐使用箭头函数，因为不会改变this执行
+        success: (res) => {
+
+          // 结构出两个结果
+          const {data, meta} = res.data;
+
+          // 判断返回状态
+          if(meta.status === 200){
+
+            // 赋值
+            this.swiperData = data;
+
+            // 是在异步请求时候才使用,只要不是在onload加载修改数据，都使用this.$apply
+            this.$apply();
+          }else{
+            console.log("error")
+          } 
+        }
+      })
+
+      // 分类的接口请求
+      wx.request({
+        url: "https://www.itjustfun.cn/api/public/v1/home/catitems",
+        success: (res) => {
+          const {data, meta} = res.data;
+          this.categorys = data;
+          this.$apply();
+        }
+      })
+
+      // 楼层
+      wx.request({
+        url: "https://www.itjustfun.cn/api/public/v1/home/floordata",
+        success: (res) => {
+          const {data, meta} = res.data;
+          if(meta.status === 200){
+            
+            // map代表映射
+            // 转换后台返回的数据为我们自定义的格式
+            const newData = data.map((v, i ) => {
+              // 变成floor格式
+              let item = {
+                // 获取头部的图片
+                titleImage: v.floor_title.image_src,
+
+                // 左侧的大图，后台product_list的第1项作为大图数据
+                largeImage: {
+                  src: v.product_list[0].image_src,
+                  url: v.product_list[0].navigator_url
+                },
+
+                // 左侧的四个小图
+                smallImage: []
+              };
+              
+              // 第一项数据已经用来当做大图渲染，所以删除第一项
+              v.product_list.shift();
+              const smallArray = v.product_list;
+              
+              // 通过循环剩余的4项赋值给item.smallImage
+              item.smallImage = smallArray.map(val => {
+
+                // 返回的四个小图的数据
+                return {
+                  src: val.image_src,
+                  url: val.navigator_url
+                }
+              });
+
+              // 整个大的map返回的数据
+              return item;
+            })
+
+            this.floor = newData;
+            this.$apply();
+          }else{
+            console.log("error")
+          }
+        }
+      })
+    }
+
+    components = {
+      search: Search
+    };
+    
+    methods = {
+      handleToTop: function(){
+        wx.pageScrollTo({
+          scrollTop: 0
+        })
+      }
+    }
+  }
+</script>

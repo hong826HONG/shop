@@ -1,0 +1,55 @@
+<style lang="less">
+
+</style>
+<template>
+  <view class="container">
+      <button @tap="handleAddCart(0)">加入购物车</button>
+      <button @tap="handleAddCart(1)">加入购物车</button>
+      <button @tap="handlUpdate(1)">加入购物车</button>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import manageCart from "../utils/manage-cart.js";
+
+export default class WareDetail extends wepy.page {
+  config = {
+    navigationBarTitleText: '搜索'
+  };
+
+  data = {
+      cacheWare: {}
+  };
+
+  onLoad(options) {
+
+  }
+
+
+  methods = {
+      handleAddCart: function(id){
+        const ware = {
+            id,
+            price: 20,
+            name: "潜水艇",
+            count: 3
+        }
+    
+        this.cacheWare = ware;
+
+        console.log(manageCart.add(ware));
+      },
+
+      handlUpdate: function(id){
+          this.cacheWare = {
+             id,
+            price: 100,
+            name: "潜水艇",
+            count: 3
+          }
+          console.log(manageCart.update(this.cacheWare))
+      }
+  };
+}
+</script>
